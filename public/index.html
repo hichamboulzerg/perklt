@@ -149,33 +149,5 @@ footer a{color:rgba(255,255,255,.9)}
   </footer>
 </div>
 
-<script>
-// Live counter increment
-setInterval(()=>{
-  const el=document.getElementById('claimed');
-  if(el && Math.random()>0.6) el.textContent=parseInt(el.textContent)+1;
-},8000);
-// Slots countdown
-setInterval(()=>{
-  const el=document.getElementById('slots');
-  if(el && Math.random()>0.85 && parseInt(el.textContent)>12){
-    el.textContent=parseInt(el.textContent)-1;
-  }
-},15000);
-// Reset timer (countdown to midnight)
-function updateTimer(){
-  const now=new Date();
-  const end=new Date(now);
-  end.setHours(23,59,59);
-  const diff=end-now;
-  const h=Math.floor(diff/3600000).toString().padStart(2,'0');
-  const m=Math.floor((diff%3600000)/60000).toString().padStart(2,'0');
-  const s=Math.floor((diff%60000)/1000).toString().padStart(2,'0');
-  const t=document.getElementById('timer');
-  if(t) t.textContent=`${h}:${m}:${s}`;
-}
-setInterval(updateTimer,1000);updateTimer();
-// Smart Link handles all routing — no JS locker needed
-</script>
 </body>
 </html>
