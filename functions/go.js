@@ -28,9 +28,9 @@ export async function onRequestGet(context) {
 
   const base = env.OGADS_URL || 'https://checkmyapp.store/sl/o1ogr';
   const smartlink =
-    `${base}?s1=${clickId}` +
-    `&s2=${encodeURIComponent(source)}` +
-    `&s3=${encodeURIComponent(campaign)}`;
+    `${base}?aff_sub=${clickId}` +
+    `&aff_sub2=${encodeURIComponent(source)}` +
+    `&aff_sub3=${encodeURIComponent(campaign)}`;
 
   try {
     await env.DB.prepare(
