@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Qualify for your $750 Amazon Gift Card</title>
+<meta name="description" content="Answer a few quick questions to unlock your $750 Amazon gift card reward.">
+<link rel="preconnect" href="https://checkmyapp.store">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Source Sans 3',-apple-system,BlinkMacSystemFont,sans-serif;background:linear-gradient(135deg,#1e3a8a 0%,#7c3aed 100%);min-height:100vh;color:#1f2937;line-height:1.6;display:flex;align-items:flex-start;justify-content:center;padding:1rem}
+.container{max-width:560px;width:100%;margin-top:1rem}
+.card{background:#fff;border-radius:24px;box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;position:relative;min-height:420px;display:flex;flex-direction:column}
+.progress{background:#f1f5f9;height:6px;width:100%;flex-shrink:0}
+.progress-fill{background:linear-gradient(90deg,#10b981,#059669);height:100%;width:0;transition:width .35s ease;border-radius:0 3px 3px 0}
+.screen{display:none;padding:2.5rem 1.75rem;text-align:center;animation:fadein .35s ease;flex:1;flex-direction:column;justify-content:center}
+.screen.active{display:flex}
+@keyframes fadein{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.eyebrow{display:inline-block;background:#fef3c7;color:#92400e;padding:.35rem .9rem;border-radius:999px;font-size:.75rem;font-weight:700;margin-bottom:1rem;letter-spacing:.03em;text-transform:uppercase;align-self:center}
+h2{font-family:'Playfair Display',Georgia,serif;font-size:clamp(1.35rem,4.5vw,1.75rem);font-weight:700;color:#111827;margin-bottom:1.25rem;line-height:1.25}
+.sub{font-size:.95rem;color:#4b5563;margin-bottom:1.5rem}
+.choices{display:flex;flex-direction:column;gap:.65rem;max-width:360px;margin:0 auto;width:100%}
+.choice{background:#fff;color:#111827;border:2px solid #e5e7eb;padding:1rem 1.25rem;border-radius:12px;font-size:1rem;font-weight:600;cursor:pointer;transition:all .15s;text-align:left;display:flex;align-items:center;gap:.75rem;font-family:inherit}
+.choice:hover{border-color:#10b981;background:#f0fdf4;transform:translateY(-1px);box-shadow:0 4px 12px rgba(16,185,129,.15)}
+.choice .emoji{font-size:1.25rem;flex-shrink:0}
+.note{font-size:.78rem;color:#9ca3af;margin-top:1.25rem}
+.big-check{width:80px;height:80px;margin:0 auto 1.25rem;background:linear-gradient(135deg,#10b981,#059669);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:2.5rem;font-weight:700;box-shadow:0 10px 30px rgba(16,185,129,.4);animation:pop .45s ease}
+@keyframes pop{0%{transform:scale(.3);opacity:0}60%{transform:scale(1.1)}100%{transform:scale(1);opacity:1}}
+.verify-label{font-size:1rem;color:#4b5563;margin:1rem 0 1.25rem;min-height:1.5rem;transition:opacity .3s}
+.verify-bar{background:#f1f5f9;height:10px;border-radius:5px;max-width:320px;margin:0 auto;overflow:hidden}
+.verify-fill{background:linear-gradient(90deg,#10b981,#059669);height:100%;width:0;border-radius:5px;transition:width 2.2s linear}
+.summary{text-align:left;max-width:320px;margin:0 auto 1.5rem;padding:1rem 1.25rem;background:#f9fafb;border-radius:12px;border:1px solid #e5e7eb}
+.summary-row{display:flex;align-items:center;gap:.6rem;padding:.35rem 0;font-size:.9rem;color:#374151}
+.summary-row .ok{color:#10b981;font-weight:700;font-size:1.05rem}
+.cta-btn{display:block;width:100%;max-width:360px;margin:.5rem auto 0;background:linear-gradient(135deg,#10b981 0%,#059669 100%);color:#fff;border:none;padding:1.1rem 1.5rem;border-radius:14px;font-size:1.1rem;font-weight:700;cursor:pointer;text-transform:uppercase;letter-spacing:.02em;box-shadow:0 10px 25px rgba(16,185,129,.4);transition:transform .15s,box-shadow .15s;text-decoration:none;text-align:center;font-family:inherit}
+.cta-btn:hover{transform:translateY(-2px);box-shadow:0 15px 35px rgba(16,185,129,.5)}
+.fail h2{color:#991b1b}
+.fail p{color:#6b7280;font-size:.95rem;max-width:360px;margin:0 auto}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="progress"><div class="progress-fill" id="progress"></div></div>
+
+    <!-- Q1: age -->
+    <div class="screen active" data-screen="age">
+      <span class="eyebrow">Step 1 of 4</span>
+      <h2>First — are you 18 or older?</h2>
+      <p class="sub">This offer is only available to adults.</p>
+      <div class="choices">
+        <button class="choice" onclick="answer('age','18')"><span class="emoji">✅</span>Yes, I'm 18 or older</button>
+        <button class="choice" onclick="answer('age','under')"><span class="emoji">❌</span>No, I'm under 18</button>
+      </div>
+    </div>
+
+    <!-- Q2: country -->
+    <div class="screen" data-screen="country">
+      <span class="eyebrow">Step 2 of 4</span>
+      <h2>Which country do you live in?</h2>
+      <p class="sub">Rewards are available in select regions only.</p>
+      <div class="choices">
+        <button class="choice" onclick="answer('country','US')"><span class="emoji">🇺🇸</span>United States</button>
+        <button class="choice" onclick="answer('country','UK')"><span class="emoji">🇬🇧</span>United Kingdom</button>
+        <button class="choice" onclick="answer('country','CA')"><span class="emoji">🇨🇦</span>Canada</button>
+        <button class="choice" onclick="answer('country','AU')"><span class="emoji">🇦🇺</span>Australia</button>
+        <button class="choice" onclick="answer('country','NZ')"><span class="emoji">🇳🇿</span>New Zealand</button>
+        <button class="choice" onclick="answer('country','other')"><span class="emoji">🌍</span>Other country</button>
+      </div>
+    </div>
+
+    <!-- Q3: intent -->
+    <div class="screen" data-screen="intent">
+      <span class="eyebrow">Step 3 of 4</span>
+      <h2>What would you spend it on?</h2>
+      <p class="sub">Your $750 Amazon credit can be used on anything.</p>
+      <div class="choices">
+        <button class="choice" onclick="answer('intent','electronics')"><span class="emoji">📱</span>Electronics &amp; tech</button>
+        <button class="choice" onclick="answer('intent','home')"><span class="emoji">🏠</span>Home &amp; furniture</button>
+        <button class="choice" onclick="answer('intent','fashion')"><span class="emoji">👗</span>Fashion &amp; beauty</button>
+        <button class="choice" onclick="answer('intent','gifts')"><span class="emoji">🎁</span>Gifts for others</button>
+        <button class="choice" onclick="answer('intent','other')"><span class="emoji">🛒</span>A bit of everything</button>
+      </div>
+    </div>
+
+    <!-- Q4: urgency -->
+    <div class="screen" data-screen="urgency">
+      <span class="eyebrow">Step 4 of 4</span>
+      <h2>How soon do you need the reward?</h2>
+      <p class="sub">This helps us reserve your gift card.</p>
+      <div class="choices">
+        <button class="choice" onclick="answer('urgency','now')"><span class="emoji">⚡</span>Right now — claim it today</button>
+        <button class="choice" onclick="answer('urgency','week')"><span class="emoji">📅</span>Within this week</button>
+        <button class="choice" onclick="answer('urgency','later')"><span class="emoji">🤔</span>Just browsing for now</button>
+      </div>
+    </div>
+
+    <!-- Verifying -->
+    <div class="screen" data-screen="verifying">
+      <h2>Verifying your eligibility…</h2>
+      <div class="verify-label" id="verifyLabel">Checking age verification…</div>
+      <div class="verify-bar"><div class="verify-fill" id="verifyFill"></div></div>
+      <p class="note">This only takes a moment.</p>
+    </div>
+
+    <!-- Qualified -->
+    <div class="screen" data-screen="qualified">
+      <div class="big-check">✓</div>
+      <h2>You qualify!</h2>
+      <div class="summary">
+        <div class="summary-row"><span class="ok">✓</span>Age verified</div>
+        <div class="summary-row" id="sumCountry"><span class="ok">✓</span>Country eligible</div>
+        <div class="summary-row"><span class="ok">✓</span>Offer available — <strong>$750 Amazon</strong></div>
+      </div>
+      <a id="claimCta" href="/go?s=quiz&c=default" class="cta-btn" rel="noopener nofollow">Claim My $750 Now →</a>
+      <p class="note">Complete one quick offer to receive your gift card.</p>
+    </div>
+
+    <!-- Fail: under 18 -->
+    <div class="screen fail" data-screen="age-fail">
+      <div class="big-check" style="background:#fca5a5;color:#7f1d1d">!</div>
+      <h2>Sorry, you must be 18 or older</h2>
+      <p>This reward program is only available to adults. Please come back when you're 18.</p>
+    </div>
+
+    <!-- Fail: country -->
+    <div class="screen fail" data-screen="country-fail">
+      <div class="big-check" style="background:#fca5a5;color:#7f1d1d">!</div>
+      <h2>Not available in your region yet</h2>
+      <p>This reward is currently available in the US, UK, Canada, Australia, and New Zealand. Check back soon — we're expanding.</p>
+    </div>
+
+    <!-- Fail: urgency = later -->
+    <div class="screen fail" data-screen="later-fail">
+      <div class="big-check" style="background:#fcd34d;color:#78350f">?</div>
+      <h2>Come back when you're ready</h2>
+      <p>This offer is time-sensitive — we can't reserve a reward for undecided users. Bookmark the page and return when you want to claim.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var state = {};
+  var order = ['age','country','intent','urgency','verifying','qualified'];
+  var incomingC = new URLSearchParams(location.search).get('c') || 'quiz';
+
+  function showScreen(name){
+    var s = document.querySelectorAll('.screen');
+    for (var i=0;i<s.length;i++) s[i].classList.remove('active');
+    var el = document.querySelector('[data-screen="'+name+'"]');
+    if (el) el.classList.add('active');
+    var idx = order.indexOf(name);
+    var pct = idx >= 0 ? ((idx+1)/order.length)*100 : (name.indexOf('fail') >= 0 ? 100 : 0);
+    document.getElementById('progress').style.width = pct + '%';
+    window.scrollTo(0,0);
+  }
+
+  function answer(q, val){
+    state[q] = val;
+    if (q === 'age') return showScreen(val === '18' ? 'country' : 'age-fail');
+    if (q === 'country') return showScreen(val === 'other' ? 'country-fail' : 'intent');
+    if (q === 'intent') return showScreen('urgency');
+    if (q === 'urgency'){
+      if (val === 'later') return showScreen('later-fail');
+      showScreen('verifying');
+      runVerify();
+    }
+  }
+  window.answer = answer;
+
+  function runVerify(){
+    var labels = [
+      'Checking age verification…',
+      'Confirming your region…',
+      'Locking in your reward…',
+      'Almost done…'
+    ];
+    var i = 0;
+    var lab = document.getElementById('verifyLabel');
+    var fill = document.getElementById('verifyFill');
+    // Kick off bar fill
+    setTimeout(function(){ fill.style.width = '100%'; }, 50);
+    var t = setInterval(function(){
+      i++;
+      if (i < labels.length) lab.textContent = labels[i];
+      else {
+        clearInterval(t);
+        finish();
+      }
+    }, 550);
+  }
+
+  function finish(){
+    var countryNames = {US:'United States', UK:'United Kingdom', CA:'Canada', AU:'Australia', NZ:'New Zealand'};
+    var cn = countryNames[state.country] || state.country || '';
+    document.getElementById('sumCountry').innerHTML = '<span class="ok">✓</span>Country eligible — ' + cn;
+    var url = '/go?s=quiz&c=' + encodeURIComponent(incomingC + '-' + (state.country||'XX'));
+    document.getElementById('claimCta').setAttribute('href', url);
+    showScreen('qualified');
+  }
+})();
+</script>
+</body>
+</html>
