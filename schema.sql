@@ -9,12 +9,15 @@ CREATE TABLE IF NOT EXISTS clicks (
   referrer TEXT,
   source TEXT,
   campaign TEXT,
-  smartlink_to TEXT
+  smartlink_to TEXT,
+  blocked TEXT,          -- NULL if passed through; else reason: geo_XX, bot_ua, empty_ua, bot_score
+  bot_score INTEGER      -- CF bot-management score (0..99), NULL if unavailable
 );
 
 CREATE INDEX IF NOT EXISTS idx_clicks_ts ON clicks(ts);
 CREATE INDEX IF NOT EXISTS idx_clicks_source ON clicks(source);
 CREATE INDEX IF NOT EXISTS idx_clicks_country ON clicks(country);
+CREATE INDEX IF NOT EXISTS idx_clicks_blocked ON clicks(blocked);
 
 CREATE TABLE IF NOT EXISTS conversions (
   subid TEXT PRIMARY KEY,
