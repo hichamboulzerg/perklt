@@ -7,6 +7,9 @@ binding = "DB"
 database_name = "perklt-stats"
 database_id = "7784d27d-11be-47bf-99e0-52cb59d87c05"
 
+# Non-secret public config (safe in git).
+# POSTBACK_SECRET and STATS_PASS are stored as encrypted Pages secrets
+# (`wrangler pages secret put ...`) and are NOT kept here.
 [vars]
 OGADS_URL = "https://checkmyapp.store/sl/o1ogr"
-POSTBACK_SECRET = "797fcb0cb618ef8304d07c1551e569cb9bf407fcad6bf76d"
+STATS_USER = "admin"
