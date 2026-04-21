@@ -1,5 +1,7 @@
 // /stats — password-protected (Basic Auth) analytics dashboard.
 // Reads clicks + conversions from D1 and renders a single HTML page.
+// CR% is computed against *passed* clicks only (blocked clicks never had
+// a chance to convert, so counting them would depress CR% artificially).
 
 const esc = (s) =>
   String(s ?? '').replace(/[&<>"']/g, (c) => ({
@@ -41,25 +43,33 @@ export async function onRequest(context) {
     db.prepare(sql).bind(...binds).all().then((r) => r.results || []);
 
   const [
-    totalsClicks, totalsConvs,
-    todayClicks, todayConvs,
-    weekClicks, weekConvs,
+    totalsClicks, totalsBlocked, totalsConvs,
+    todayClicks, todayBlocked, todayConvs,
+    weekClicks, weekBlocked, weekConvs,
     clicksBySource, convsBySource,
     clicksByCountry,
     topOffers,
+    blockReasons,
     recentClicks, recentConvs,
   ] = await Promise.all([
-    db.prepare('SELECT COUNT(*) AS n FROM clicks').first(),
+    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE blocked IS NULL').first(),
+    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE blocked IS NOT NULL').first(),
     db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(payout),0) AS payout FROM conversions').first(),
-    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE ts >= ?').bind(todayMs).first(),
+
+    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE blocked IS NULL AND ts >= ?').bind(todayMs).first(),
+    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE blocked IS NOT NULL AND ts >= ?').bind(todayMs).first(),
     db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(payout),0) AS payout FROM conversions WHERE ts >= ?').bind(todayMs).first(),
-    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE ts >= ?').bind(weekAgoMs).first(),
+
+    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE blocked IS NULL AND ts >= ?').bind(weekAgoMs).first(),
+    db.prepare('SELECT COUNT(*) AS n FROM clicks WHERE blocked IS NOT NULL AND ts >= ?').bind(weekAgoMs).first(),
     db.prepare('SELECT COUNT(*) AS n, COALESCE(SUM(payout),0) AS payout FROM conversions WHERE ts >= ?').bind(weekAgoMs).first(),
-    all('SELECT source, COUNT(*) AS clicks FROM clicks GROUP BY source'),
+
+    all('SELECT source, COUNT(*) AS clicks FROM clicks WHERE blocked IS NULL GROUP BY source'),
     all('SELECT source, COUNT(*) AS convs, COALESCE(SUM(payout),0) AS payout FROM conversions GROUP BY source'),
-    all("SELECT country, COUNT(*) AS clicks FROM clicks WHERE country <> '' GROUP BY country ORDER BY clicks DESC LIMIT 10"),
+    all("SELECT country, COUNT(*) AS clicks FROM clicks WHERE blocked IS NULL AND country <> '' GROUP BY country ORDER BY clicks DESC LIMIT 10"),
     all("SELECT offer_id, offer, COUNT(*) AS convs, COALESCE(SUM(payout),0) AS payout FROM conversions WHERE offer_id <> '' GROUP BY offer_id ORDER BY payout DESC LIMIT 10"),
-    all('SELECT id, ts, country, source, campaign FROM clicks ORDER BY ts DESC LIMIT 20'),
+    all("SELECT blocked, COUNT(*) AS n FROM clicks WHERE blocked IS NOT NULL GROUP BY blocked ORDER BY n DESC"),
+    all('SELECT id, ts, country, source, campaign, blocked FROM clicks ORDER BY ts DESC LIMIT 20'),
     all('SELECT subid, ts, payout, offer, source, campaign FROM conversions ORDER BY ts DESC LIMIT 20'),
   ]);
 
@@ -75,14 +85,20 @@ export async function onRequest(context) {
   }
   const sources = [...sourceMap.values()].sort((a, b) => b.clicks - a.clicks);
 
-  const kpi = (label, value, sub = '') => `
-    <div class="kpi">
+  const kpi = (label, value, sub = '', cls = '') => `
+    <div class="kpi ${cls}">
       <div class="kpi-label">${esc(label)}</div>
       <div class="kpi-value">${esc(value)}</div>
       ${sub ? `<div class="kpi-sub">${esc(sub)}</div>` : ''}
     </div>`;
 
   const row = (cells) => `<tr>${cells.map((c) => `<td>${c}</td>`).join('')}</tr>`;
+
+  const blockBadge = (reason) => {
+    if (!reason) return '<span class="badge ok">passed</span>';
+    if (reason.startsWith('geo_')) return `<span class="badge geo">${esc(reason)}</span>`;
+    return `<span class="badge bot">${esc(reason)}</span>`;
+  };
 
   const html = `<!DOCTYPE html>
 <html lang="en">
@@ -99,9 +115,12 @@ h1{font-size:1.1rem;color:#10b981;font-weight:600;margin-bottom:.25rem;letter-sp
 h2{font-size:.75rem;color:#737373;text-transform:uppercase;letter-spacing:.12em;margin:2rem 0 .75rem;font-weight:600}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem;margin-bottom:1rem}
 .kpi{background:#171717;border:1px solid #262626;border-radius:8px;padding:1rem}
+.kpi.warn{border-color:#422006}
 .kpi-label{font-size:.7rem;color:#737373;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.4rem}
 .kpi-value{font-size:1.4rem;font-weight:700;color:#fafafa;line-height:1.1}
+.kpi.warn .kpi-value{color:#f59e0b}
 .kpi-sub{font-size:.75rem;color:#10b981;margin-top:.3rem}
+.kpi.warn .kpi-sub{color:#f59e0b}
 table{width:100%;border-collapse:collapse;background:#171717;border:1px solid #262626;border-radius:8px;overflow:hidden;font-size:.85rem}
 th,td{padding:.6rem .8rem;text-align:left;border-bottom:1px solid #262626}
 th{background:#0f0f0f;color:#737373;font-weight:600;font-size:.7rem;text-transform:uppercase;letter-spacing:.08em}
@@ -112,6 +131,10 @@ td.muted{color:#737373}
 .empty{color:#525252;font-style:italic;padding:.5rem 0}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 @media(max-width:720px){.grid{grid-template-columns:1fr}}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600;font-family:inherit}
+.badge.ok{background:#0f2e1f;color:#10b981;border:1px solid #1a4731}
+.badge.bot{background:#3b0f0f;color:#fca5a5;border:1px solid #7f1d1d}
+.badge.geo{background:#3b2e0a;color:#fbbf24;border:1px solid #78350f}
 footer{margin-top:3rem;color:#525252;font-size:.7rem;text-align:center}
 </style>
 </head>
@@ -119,30 +142,33 @@ footer{margin-top:3rem;color:#525252;font-size:.7rem;text-align:center}
 <h1>perklt — stats</h1>
 <div class="sub">auto-refresh 60s · generated ${esc(fmtTs(now))}</div>
 
-<h2>Totals</h2>
+<h2>Totals (all-time)</h2>
 <div class="kpis">
-  ${kpi('All-time clicks', fmtNum(totalsClicks?.n))}
-  ${kpi('All-time conv', fmtNum(totalsConvs?.n), pct(totalsConvs?.n, totalsClicks?.n) + ' CR')}
-  ${kpi('All-time payout', fmtUSD(totalsConvs?.payout))}
+  ${kpi('Clicks (passed)', fmtNum(totalsClicks?.n))}
+  ${kpi('Blocked', fmtNum(totalsBlocked?.n), pct(totalsBlocked?.n, (totalsClicks?.n || 0) + (totalsBlocked?.n || 0)) + ' of total', 'warn')}
+  ${kpi('Conversions', fmtNum(totalsConvs?.n), pct(totalsConvs?.n, totalsClicks?.n) + ' CR')}
+  ${kpi('Payout', fmtUSD(totalsConvs?.payout))}
 </div>
 
 <h2>Today (UTC)</h2>
 <div class="kpis">
-  ${kpi('Clicks', fmtNum(todayClicks?.n))}
+  ${kpi('Clicks (passed)', fmtNum(todayClicks?.n))}
+  ${kpi('Blocked', fmtNum(todayBlocked?.n), pct(todayBlocked?.n, (todayClicks?.n || 0) + (todayBlocked?.n || 0)) + ' of total', 'warn')}
   ${kpi('Conversions', fmtNum(todayConvs?.n), pct(todayConvs?.n, todayClicks?.n) + ' CR')}
   ${kpi('Payout', fmtUSD(todayConvs?.payout))}
 </div>
 
 <h2>Last 7 days</h2>
 <div class="kpis">
-  ${kpi('Clicks', fmtNum(weekClicks?.n))}
+  ${kpi('Clicks (passed)', fmtNum(weekClicks?.n))}
+  ${kpi('Blocked', fmtNum(weekBlocked?.n), pct(weekBlocked?.n, (weekClicks?.n || 0) + (weekBlocked?.n || 0)) + ' of total', 'warn')}
   ${kpi('Conversions', fmtNum(weekConvs?.n), pct(weekConvs?.n, weekClicks?.n) + ' CR')}
   ${kpi('Payout', fmtUSD(weekConvs?.payout))}
 </div>
 
 <div class="grid">
   <div>
-    <h2>By source</h2>
+    <h2>By source (passed clicks)</h2>
     ${sources.length === 0 ? '<div class="empty">no data yet</div>' : `<table>
       <thead><tr><th>source</th><th class="n">clicks</th><th class="n">conv</th><th class="n">CR</th><th class="n">payout</th></tr></thead>
       <tbody>${sources.map((s) => row([
@@ -156,7 +182,7 @@ footer{margin-top:3rem;color:#525252;font-size:.7rem;text-align:center}
   </div>
 
   <div>
-    <h2>By country (top 10)</h2>
+    <h2>By country (top 10, passed)</h2>
     ${clicksByCountry.length === 0 ? '<div class="empty">no data yet</div>' : `<table>
       <thead><tr><th>country</th><th class="n">clicks</th></tr></thead>
       <tbody>${clicksByCountry.map((c) => row([
@@ -166,6 +192,26 @@ footer{margin-top:3rem;color:#525252;font-size:.7rem;text-align:center}
     </table>`}
   </div>
 </div>
+
+<h2>Block reasons (all-time)</h2>
+${blockReasons.length === 0 ? '<div class="empty">nothing blocked yet — either no traffic or the filter has a hole</div>' : `<table>
+  <thead><tr><th>reason</th><th class="n">count</th><th>meaning</th></tr></thead>
+  <tbody>${blockReasons.map((b) => {
+    const reasons = {
+      bot_ua: 'User-Agent matched a bot/scraper pattern',
+      empty_ua: 'No User-Agent header sent',
+      bot_score: 'Cloudflare bot-management score < 30',
+    };
+    const meaning = b.blocked.startsWith('geo_')
+      ? 'Country outside tier-1 (' + b.blocked.slice(4) + ')'
+      : (reasons[b.blocked] || '(unclassified)');
+    return row([
+      `<code>${esc(b.blocked)}</code>`,
+      `<span class="n">${fmtNum(b.n)}</span>`,
+      `<span class="muted">${esc(meaning)}</span>`,
+    ]);
+  }).join('')}</tbody>
+</table>`}
 
 <h2>Top offers by payout</h2>
 ${topOffers.length === 0 ? '<div class="empty">no conversions yet</div>' : `<table>
@@ -191,11 +237,12 @@ ${recentConvs.length === 0 ? '<div class="empty">no conversions yet</div>' : `<t
   ])).join('')}</tbody>
 </table>`}
 
-<h2>Recent clicks (20)</h2>
+<h2>Recent clicks (20 — incl. blocked)</h2>
 ${recentClicks.length === 0 ? '<div class="empty">no clicks yet</div>' : `<table>
-  <thead><tr><th>when</th><th>click_id</th><th>country</th><th>source</th><th>campaign</th></tr></thead>
+  <thead><tr><th>when</th><th>status</th><th>click_id</th><th>country</th><th>source</th><th>campaign</th></tr></thead>
   <tbody>${recentClicks.map((c) => row([
     `<span class="muted">${esc(fmtTs(c.ts))}</span>`,
+    blockBadge(c.blocked),
     `<code>${esc(c.id)}</code>`,
     esc(c.country),
     esc(c.source),
