@@ -21,10 +21,15 @@ CREATE TABLE IF NOT EXISTS conversions (
   ts INTEGER NOT NULL,
   payout REAL DEFAULT 0,
   offer TEXT,
+  offer_id TEXT,
+  affiliate_id TEXT,
   source TEXT,
   campaign TEXT,
+  session_ip TEXT,
+  session_ts TEXT,
   raw TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_conv_ts ON conversions(ts);
 CREATE INDEX IF NOT EXISTS idx_conv_source ON conversions(source);
+CREATE INDEX IF NOT EXISTS idx_conv_offer ON conversions(offer_id);
